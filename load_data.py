@@ -49,8 +49,8 @@ class DataLoader(object):
 
         elif self.args.data == 'news':
             """ NEWS DATA LOAD """
-            X_data = pd.read_csv('data/NEWS_csv/topic_doc_mean_n5000_k3477_seed_'+str(self.args.data_seed)+'.csv.x')
-            AY_data = pd.read_csv('data/NEWS_csv/topic_doc_mean_n5000_k3477_seed_'+str(self.args.data_seed)+'.csv.y', header=None)
+            X_data = pd.read_csv('data/NEWS_csv/csv/topic_doc_mean_n5000_k3477_seed_'+str(self.args.data_seed)+'.csv.x')
+            AY_data = pd.read_csv('data/NEWS_csv/csv/topic_doc_mean_n5000_k3477_seed_'+str(self.args.data_seed)+'.csv.y', header=None)
 
             ## preprocess X
             X = np.zeros((5000, 3477))
