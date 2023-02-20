@@ -10,7 +10,7 @@ parser.add_argument('--test-batch-size','-tb', type=int, default=200,
                     help='input mini-batch size for testing')
 parser.add_argument('--train_seed','-ts', type=int, default=1,
                     help='random seed for parameters and training')                    
-parser.add_argument('--epochs','-e', type=int, default=20,
+parser.add_argument('--epochs','-e', type=int, default=1000,
                     help='number of epochs to train (default: 20)')
 ## cuda & gpu
 parser.add_argument('--no-cuda', action='store_true', default=True,
@@ -25,7 +25,7 @@ parser.add_argument('--lr','-lr', type=float, default=0.001,
 parser.add_argument('--weight_decay','-wd', type=float, default=0.99,
                     help='The strength of weight decay for Adam')          
 ## objective function
-parser.add_argument('--imbalance_func','-imbf', type=str, default='lin_disc',
+parser.add_argument('--imbalance_func','-imbf', type=str, default='wasserstein',
                     help='Function for balancing feature reprensetation')
 parser.add_argument('--reg_alpha','-ra', type=float, default=1.0,
                     help='Regularization parameter for balancing feature representation')         
