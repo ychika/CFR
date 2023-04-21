@@ -10,14 +10,16 @@ def objective(y, y_hat, X, a, p, reg_alpha, loss_func='l1', imbalance_func='mmd2
     # compute prediction loss
     if loss_func == 'l1':
         pred_loss = torch_l1_loss(y, y_hat, w)
+    elif loss_func == 'l2':
+        pred_loss = torch_l2_loss(y, y_hat, w)    
     elif loss_func == 'ce':
         pred_loss = torch_ce_loss(y, y_hat, w)
     else:
-        print("Error: loss_func = " + str(loss_func) + " is not implemented", file=sys.stderr)
+        print("Error: loss_func = " + str(loss_func) + " is not implemented!", file=sys.stderr)
         sys.exit(1)
 
     # compute 'imbalance loss' used to balance feature representations
-    if imbalance_func == 'lin_disc':
+    if imbalance_func == 'lin_disc': 
         imbalance_loss = lin_disc(X, a, p)
     elif imbalance_func == 'mmd2_lin':
         imbalance_loss = mmd2_lin(X, a, p)
@@ -30,12 +32,18 @@ def objective(y, y_hat, X, a, p, reg_alpha, loss_func='l1', imbalance_func='mmd2
         print("Error: imbalance_func = " + str(imbalance_func) + " is not implemented", file=sys.stderr)
         sys.exit(1)    
 
+    #print((pred_loss, reg_alpha * imbalance_loss))
     return pred_loss + reg_alpha * imbalance_loss
+    #return pred_loss #+ reg_alpha * imbalance_loss
 
 ##### Loss functions
 ### (weighted) L1 loss for continuous-valued outcome
 def torch_l1_loss(y, y_hat, w):
     res = w * torch.abs(y_hat - y)
+    return torch.mean(res)
+### (weighted) L1 loss for continuous-valued outcome
+def torch_l2_loss(y, y_hat, w):
+    res = w * torch.square(y_hat - y)
     return torch.mean(res)
 ### (weighted) cross entropy loss for binary outcome
 def torch_ce_loss(y, y_hat, w):
@@ -61,8 +69,8 @@ def lin_disc(X, a, p):
 ### Linear MMD [Johansson+; ||v|| const=2.0 leads to ||v|| in Eq. (8), Sec. 4.1, ICML2016]
 
 def mmd2_lin(X, a, p, const=2.0):
-    #_t_ind = torch.where((a == 1).all(axis=1))[0] ## a: treatment vector in torch.Tensor
-    #_c_ind = torch.where((a == 0).all(axis=1))[0]
+    #_t_ind = np.where((a.detach().numpy() == 1))[0] ## a: treatment vector in torch.Tensor
+    #_c_ind = np.where((a.detach().numpy() == 0))[0]
     _t_ind = torch.where(a == 1)[0] ## a: treatment vector in torch.Tensor
     _c_ind = torch.where(a == 0)[0]
     X1 = X[_t_ind]

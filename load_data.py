@@ -12,11 +12,11 @@ def get_train_val_test(data, tr_ind, val_ind, te_ind):
     return data[tr_ind], data[val_ind], data[te_ind]
 
 class DataLoader(object):
-    def __init__(self, args):
+    def __init__(self, args, idx):
         self.args = args
-        self._load()
+        self._load(idx)
 
-    def _load(self):
+    def _load(self, idx):
         print('----- Loading data -----')
         if self.args.data == 'ihdp':
             pipe = Pipeline([('scaling', StandardScaler()), ('pca', PCA(n_components=self.args.comp))])
@@ -25,7 +25,6 @@ class DataLoader(object):
             """ IHDP DATA LOAD """
             tr_data = np.load('data/ihdp_npci_1-1000.train.npz')
             te_data = np.load('data/ihdp_npci_1-1000.test.npz')
-            idx = self.args.data_seed - 1
 
             ## concatenate original training and test data
             A = np.concatenate((tr_data['t'][:,idx], te_data['t'][:,idx]))
@@ -33,6 +32,7 @@ class DataLoader(object):
             Y = np.concatenate((tr_data['yf'][:,idx], te_data['yf'][:,idx]))
             Y0 = np.concatenate((tr_data['mu0'][:,idx], te_data['mu0'][:,idx]))
             Y1 = np.concatenate((tr_data['mu1'][:,idx], te_data['mu1'][:,idx]))
+
 
             ## preprocess X (scaling + PCA)
             X_neighbor = pipe.fit_transform(X)
@@ -43,14 +43,14 @@ class DataLoader(object):
             Y = (Y1 + noise1) * A + (Y0 + noise0) * (1 - A)
 
             ind = np.arange(len(X))
-            tr_ind = ind[:298] 
-            val_ind = ind[298:373]
-            te_ind = ind[373:747]
+            tr_ind = ind[:470] 
+            val_ind = ind[470:670]
+            te_ind = ind[670:747]
 
         elif self.args.data == 'news':
             """ NEWS DATA LOAD """
-            X_data = pd.read_csv('data/NEWS_csv/csv/topic_doc_mean_n5000_k3477_seed_'+str(self.args.data_seed)+'.csv.x')
-            AY_data = pd.read_csv('data/NEWS_csv/csv/topic_doc_mean_n5000_k3477_seed_'+str(self.args.data_seed)+'.csv.y', header=None)
+            X_data = pd.read_csv('data/NEWS_csv/csv/topic_doc_mean_n5000_k3477_seed_'+ str(idx) + '.csv.x')
+            AY_data = pd.read_csv('data/NEWS_csv/csv/topic_doc_mean_n5000_k3477_seed_'+ str(idx) +'.csv.y', header=None)
 
             ## preprocess X
             X = np.zeros((5000, 3477))
@@ -77,6 +77,7 @@ class DataLoader(object):
             Y = (Y1 + noise1) * A + (Y0 + noise0) * (1 - A)
 
             ind = np.arange(len(X))
+
             tr_ind = ind[:500]
             val_ind = ind[500:1000]
             te_ind = ind[1000:]
@@ -95,10 +96,11 @@ class DataLoader(object):
         num_samples_0 = len(np.where(A_tr == 0)[0])
         self.p_tr = float(num_samples_1) / (float(num_samples_0) + float(num_samples_1))
 
+
         ## np.array -> torch.Tensor -> torch.utils.data.DataLoader
         tr_data_torch = torch.utils.data.TensorDataset(torch.from_numpy(tr_ind), torch.Tensor(A_tr), torch.Tensor(X_tr), torch.Tensor(Y_tr))
         val_data_torch = torch.utils.data.TensorDataset(torch.from_numpy(val_ind), torch.Tensor(A_val), torch.Tensor(X_val), torch.Tensor(Y_val))
-        te_data_torch = torch.utils.data.TensorDataset(torch.from_numpy(te_ind), torch.Tensor(X_te), torch.Tensor(Y1_te),torch.Tensor(Y0_te))
+        te_data_torch = torch.utils.data.TensorDataset(torch.from_numpy(te_ind), torch.Tensor(X_te), torch.Tensor(Y0_te), torch.Tensor(Y1_te))
         in_data_torch = torch.utils.data.TensorDataset(
             torch.cat((torch.from_numpy(tr_ind),torch.from_numpy(val_ind))),
             torch.Tensor(np.concatenate((X_tr, X_val))), 
@@ -107,7 +109,7 @@ class DataLoader(object):
             )
 
         self.tr_loader = torch.utils.data.DataLoader(tr_data_torch, batch_size=self.args.batch_size, shuffle=True, worker_init_fn=np.random.seed(self.args.data_seed))
-        self.val_loader = torch.utils.data.DataLoader(val_data_torch, batch_size=self.args.test_batch_size, shuffle=False)
-        self.te_loader = torch.utils.data.DataLoader(te_data_torch, batch_size=self.args.test_batch_size, shuffle=False)
-        self.in_loader = torch.utils.data.DataLoader(in_data_torch, batch_size=self.args.test_batch_size, shuffle=False)
+        self.val_loader = torch.utils.data.DataLoader(val_data_torch, batch_size=self.args.batch_size, shuffle=False)
+        self.te_loader = torch.utils.data.DataLoader(te_data_torch, batch_size=self.args.batch_size, shuffle=False)
+        self.in_loader = torch.utils.data.DataLoader(in_data_torch, batch_size=self.args.batch_size, shuffle=False)
         print('----- Finished loading data -----')

@@ -6,11 +6,9 @@ parser = argparse.ArgumentParser(description='CFR-ISW')
 ## training setting
 parser.add_argument('--batch_size', '-b', type=int, default=100,
                     help='input mini-batch size for training')
-parser.add_argument('--test-batch-size','-tb', type=int, default=200,
-                    help='input mini-batch size for testing')
 parser.add_argument('--train_seed','-ts', type=int, default=1,
                     help='random seed for parameters and training')                    
-parser.add_argument('--epochs','-e', type=int, default=1000,
+parser.add_argument('--epochs','-e', type=int, default=5000,
                     help='number of epochs to train (default: 20)')
 ## cuda & gpu
 parser.add_argument('--no-cuda', action='store_true', default=True,
@@ -20,16 +18,16 @@ parser.add_argument('--gpu','-gpu', type=int, default=0,
 ## optimization setting
 parser.add_argument('--optim','-o', type=str, default='Adam',
                     help='optimization algorithm')
-parser.add_argument('--lr','-lr', type=float, default=0.001,
+parser.add_argument('--lr','-lr', type=float, default=0.0001,
                     help='learning rate')
-parser.add_argument('--weight_decay','-wd', type=float, default=0.99,
+parser.add_argument('--weight_decay','-wd', type=float, default=0.001,
                     help='The strength of weight decay for Adam')          
 ## objective function
 parser.add_argument('--imbalance_func','-imbf', type=str, default='wasserstein',
                     help='Function for balancing feature reprensetation')
 parser.add_argument('--reg_alpha','-ra', type=float, default=1.0,
                     help='Regularization parameter for balancing feature representation')         
-parser.add_argument('--reg_decay','-rd', type=float, default=0.99,
+parser.add_argument('--reg_decay','-rd', type=float, default=0.999,
                     help='decay the strength of regularization as number of epochs increases')                      
 ## NN architecture parameters
 parser.add_argument('--enc_num_layers','-enl', type=int, default=3,
@@ -38,7 +36,7 @@ parser.add_argument('--enc_h_dim','-ehd', type=int, default=100,
                     help='the feature dimension of feature representation (encoder)')
 parser.add_argument('--enc_out_dim','-eod', type=int, default=100,
                     help='the output dimension of feature representation (encoder)')
-parser.add_argument('--enc_dropout','-edp', type=float, default=0.2,
+parser.add_argument('--enc_dropout','-edp', type=float, default=0.145,
                     help='The ratio of drop out for feature representation (encoder)')
 parser.add_argument('--bool_outhead','-oh', action='store_true', default=True,
                     help='split NNs into Phi and outcome heads: True for CFR (Shalit+; ICML2017); False for BNN (Johansson+; ICML2016)')
@@ -48,7 +46,7 @@ parser.add_argument('--oh_h_dim','-ohd', type=int, default=100,
                     help='the feature dimension of outcome head (decoder)')
 parser.add_argument('--oh_out_dim','-ood', type=int, default=1,
                     help='the output dimension of outcome head (decoder)')
-parser.add_argument('--oh_dropout','-odp', type=float, default=0.2,
+parser.add_argument('--oh_dropout','-odp', type=float, default=0.145,
                     help='The ratio of drop out for outcome head (decoder)')
 ## choose dataset 
 parser.add_argument('--data','-d', type=str, default='ihdp',
